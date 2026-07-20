@@ -17,6 +17,7 @@
 #define ACCELEROMETER_DEVICE(i, _)                                                           \
 	IF_ENABLED(DT_NODE_EXISTS(ACCEL_ALIAS(i)), (DEVICE_DT_GET(ACCEL_ALIAS(i)),))
 #define NUM_SENSORS 1
+static const struct device *const pir_dev = DEVICE_DT_GET(DT_NODELABEL(pir0));
 
 /* support up to 10 accelerometer sensors */
 static const struct device *const sensors[] = {LISTIFY(10, ACCELEROMETER_DEVICE, ())};
@@ -137,6 +138,13 @@ int main(void)
 {
 	int ret;
 
+	if (!device_is_ready(pir_dev)) {
+		printk("PIR device not ready\n");
+		return 0;
+	}
+
+	printk("PIR device ready: %s\n", pir_dev->name);
+
 	for (size_t i = 0; i < ARRAY_SIZE(sensors); i++) {
 		if (!device_is_ready(sensors[i])) {
 			printk("sensor: device %s not ready.\n", sensors[i]->name);
@@ -147,6 +155,23 @@ int main(void)
 
 #ifndef CONFIG_COVERAGE
 	while (1) {
+
+		struct sensor_value pir_value;
+
+		ret = sensor_sample_fetch(pir_dev);
+		if (ret < 0) {
+			printk("PIR fetch failed: %d\n", ret);
+		}
+
+		ret = sensor_channel_get(pir_dev,
+					 SENSOR_CHAN_ALL,
+					 &pir_value);
+		if (ret < 0) {
+			printk("PIR get failed: %d\n", ret);
+		}
+
+		printk("PIR state: %d\n", pir_value.val1);
+
 #else
 	for (int k = 0; k < 5; k++) {
 #endif
