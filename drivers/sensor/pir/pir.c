@@ -1,11 +1,12 @@
 /*
  * Copyright (c) 2026
- *
+ *`
  * SPDX-License-Identifier: Apache-2.0
  */
 
 #define DT_DRV_COMPAT sujan_pir
 
+#include <errno.h>
 #include <zephyr/kernel.h>
 #include <zephyr/device.h>
 #include <zephyr/drivers/gpio.h>
@@ -18,6 +19,7 @@ LOG_MODULE_REGISTER(sujan_pir, CONFIG_SENSOR_LOG_LEVEL);
 struct pir_config {
 	struct gpio_dt_spec gpio;
 };
+
 
 /* Runtime data */
 struct pir_data {
